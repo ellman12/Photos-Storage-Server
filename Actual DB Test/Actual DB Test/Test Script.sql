@@ -24,3 +24,5 @@ WHERE album_id=1;
 
 -- Select only items from media that have 0 (false)
 select * from media where Separate = "0";
+
+insert into albums (name, folder) values ("test", true);

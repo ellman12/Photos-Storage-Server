@@ -9,11 +9,11 @@ namespace Actual_DB_Test
         {
             Connection c = new();
             List<Connection.Media> yes = new();
-            c.InsertMedia("item1", DateTime.Now);
-            c.InsertMedia("item2", DateTime.Now);
-            c.InsertMedia("item3", DateTime.Now);
-            c.InsertMedia("item4", DateTime.Now);
-            c.InsertMedia("item5", DateTime.Now);
+            //c.InsertMedia("item1", DateTime.Now);
+            //c.InsertMedia("item2", DateTime.Now);
+            //c.InsertMedia("item3", DateTime.Now);
+            //c.InsertMedia("item4", DateTime.Now);
+            //c.InsertMedia("item5", DateTime.Now);
             yes = c.LoadMediaTable();
 
             foreach (var y in yes)

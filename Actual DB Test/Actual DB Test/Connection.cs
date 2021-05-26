@@ -106,14 +106,16 @@ namespace Actual_DB_Test
         }
 
         //Create a new album and add it to the table of album names and IDs. ID is auto incrementing.
-        public void CreateAlbum(string name)
+        //Specify true for the folder param if it should be treated as a folder.
+        public void CreateAlbum(string name, bool folder)
         {
             if (OpenConnection())
             {
                 try
                 {
-                    MySqlCommand cmd = new MySqlCommand("INSERT INTO albums (Name) VALUES (@name)", connection);
+                    MySqlCommand cmd = new MySqlCommand("INSERT INTO albums (name, folder) VALUES (@name, @folder)", connection);
                     cmd.Parameters.AddWithValue("@name", name);
+                    cmd.Parameters.AddWithValue("@folder", folder);
                     cmd.ExecuteNonQuery();
                 }
                 catch (MySqlException e)
@@ -352,7 +354,7 @@ namespace Actual_DB_Test
             }
         }
 
-        //Loads everything in the media table in descending order that is not in a folder.
+        //Loads everything in the media table in descending order (most recently-taken item first) that is not in a folder.
         public List<Media> LoadMediaTable()
         {
             List<Media> media = new(); //Stores every row retrieved; returned later.
