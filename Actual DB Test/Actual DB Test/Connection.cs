@@ -175,10 +175,10 @@ namespace Actual_DB_Test
                 try
                 {
                     //Find the album ID using the album name.
-                    MySqlCommand selectCmd = new MySqlCommand("SELECT id FROM albums WHERE name=@name", connection);
-                    selectCmd.Parameters.AddWithValue("@name", name);
-                    selectCmd.ExecuteNonQuery();
-                    MySqlDataReader reader = selectCmd.ExecuteReader();
+                    MySqlCommand cmd = new("SELECT id FROM albums WHERE name=@name", connection);
+                    cmd.Parameters.AddWithValue("@name", name);
+                    cmd.ExecuteNonQuery();
+                    MySqlDataReader reader = cmd.ExecuteReader();
 
                     if (reader.HasRows) //Check if there is actually a row to read. If reader.Read() is called and there isn't, a nasty exception is raised.
                     {
@@ -197,6 +197,40 @@ namespace Actual_DB_Test
                 }
             }
 
+            return returnVal;
+        }
+
+        //Given an album name, returns if an album is a folder.
+        public bool IsFolder(string name)
+        {
+            bool returnVal = false;
+            if (OpenConnection())
+            {
+                try
+                {
+                    //Find the album ID using the album name.
+                    MySqlCommand cmd = new("SELECT folder FROM albums WHERE name=@name", connection);
+                    cmd.Parameters.AddWithValue("@name", name);
+                    cmd.ExecuteNonQuery();
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.HasRows) //Check if there is actually a row to read. If reader.Read() is called and there isn't, a nasty exception is raised.
+                    {
+                        reader.Read(); //There should only be 1 line to read.
+                        if (reader.GetBoolean(0) == true) //If a folder
+                            returnVal = true;
+                        reader.Close();
+                    }
+                }
+                catch (MySqlException e)
+                {
+                    Console.WriteLine("An unknown error occurred. Error code: " + e.Number + " Message: " + e.Message);
+                }
+                finally
+                {
+                    CloseConnection();
+                }
+            }
             return returnVal;
         }
 

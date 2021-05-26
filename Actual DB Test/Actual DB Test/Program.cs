@@ -14,12 +14,14 @@ namespace Actual_DB_Test
             //c.InsertMedia("item3", DateTime.Now);
             //c.InsertMedia("item4", DateTime.Now);
             //c.InsertMedia("item5", DateTime.Now);
+            var cool = c.IsFolder("test2");
+            Console.WriteLine(cool);
             yes = c.LoadMediaTable();
 
-            foreach (var y in yes)
-            {
-                Console.WriteLine(y.path + '\t' + y.dateAdded + '\t' + y.dateTaken);
-            }
+            //foreach (var y in yes)
+            //{
+                //Console.WriteLine(y.path + '\t' + y.dateAdded + '\t' + y.dateTaken);
+            //}
         }
     }
 }

@@ -16,17 +16,18 @@ CREATE TABLE `album_entries_trash` (
 CREATE TABLE `albums` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(600) NOT NULL,
-  `album_cover` varchar(600),
+  `album_cover` varchar(600) DEFAULT NULL,
+  `folder` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `media` (
   `path` varchar(600) NOT NULL,
   `date_added` datetime NOT NULL,
   `date_taken` datetime NOT NULL,
-  `separate` BOOLEAN NOT NULL,
+  `separate` tinyint(1) NOT NULL,
   PRIMARY KEY (`path`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -34,6 +35,6 @@ CREATE TABLE `media_trash` (
   `path` varchar(600) NOT NULL,
   `date_added` datetime NOT NULL,
   `date_taken` datetime NOT NULL,
-  `Separate` BOOLEAN NOT NULL,
+  `Separate` tinyint(1) NOT NULL,
   PRIMARY KEY (`path`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
