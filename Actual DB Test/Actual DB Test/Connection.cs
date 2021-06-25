@@ -75,7 +75,7 @@ namespace Actual_DB_Test
         }
 
         //For inserting a photo or video into the media table (the main table). Will not insert duplicates.
-        public void InsertMedia(string path, DateTime dateTaken)
+        public void InsertMedia(string path, DateTime dateTaken, bool separate)
         {
             if (OpenConnection())
             {
@@ -83,7 +83,7 @@ namespace Actual_DB_Test
                 cmd.Parameters.AddWithValue("@path", path);
                 cmd.Parameters.AddWithValue("@dateAdded", DateTime.Now);
                 cmd.Parameters.AddWithValue("@dateTaken", dateTaken);
-                cmd.Parameters.AddWithValue("@separate", false);
+                cmd.Parameters.AddWithValue("@separate", separate);
 
                 try
                 {
@@ -196,7 +196,39 @@ namespace Actual_DB_Test
                     CloseConnection();
                 }
             }
+            return returnVal;
+        }
 
+        //Given an album ID, return its name.
+        public string GetAlbumName(int albumID)
+        {
+            string returnVal = "";
+            if (OpenConnection())
+            {
+                try
+                {
+                    //Find the album ID using the album name.
+                    MySqlCommand cmd = new("SELECT name FROM albums WHERE id=@albumID", connection);
+                    cmd.Parameters.AddWithValue("@albumID", albumID);
+                    cmd.ExecuteNonQuery();
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.HasRows) //Check if there is actually a row to read. If reader.Read() is called and there isn't, a nasty exception is raised.
+                    {
+                        reader.Read(); //There should only be 1 line to read.
+                        returnVal = reader.GetString(0);
+                        reader.Close();
+                    }
+                }
+                catch (MySqlException e)
+                {
+                    Console.WriteLine("An unknown error occurred. Error code: " + e.Number + " Message: " + e.Message);
+                }
+                finally
+                {
+                    CloseConnection();
+                }
+            }
             return returnVal;
         }
 
@@ -243,7 +275,7 @@ namespace Actual_DB_Test
                 try
                 {
                     //Find the ID of the album to delete, then use that to delete every item in that album from album_entries.
-                    MySqlCommand selectCmd = new MySqlCommand("SELECT id FROM albums WHERE name=@name", connection);
+                    MySqlCommand selectCmd = new("SELECT id FROM albums WHERE name=@name", connection);
                     selectCmd.Parameters.AddWithValue("@name", name);
                     selectCmd.ExecuteNonQuery();
                     MySqlDataReader reader = selectCmd.ExecuteReader();
@@ -283,12 +315,28 @@ namespace Actual_DB_Test
         //Add a single path to an album in album_entries.
         public void AddToAlbum(string path, int albumID)
         {
+            if (IsFolder(GetAlbumName(albumID))) //If it's a folder, update it as separate in media.
+            {
+                try //TODO
+                {
+                    MySqlCommand cmd = new( , connection);
+                }
+                catch (MySqlException e)
+                {
+                    Console.WriteLine("An unknown error occurred. Error code: " + e.Number + " Message: " + e.Message);
+                }
+                finally
+                {
+                    CloseConnection();
+                }
+            }
+
             if (OpenConnection())
             {
                 try
                 {
                     //Will IGNORE (not throw error) if there is a duplicate.
-                    MySqlCommand cmd = new MySqlCommand("INSERT IGNORE INTO album_entries VALUES (@path, @albumID, @date_added_to_album)", connection);
+                    MySqlCommand cmd = new("INSERT IGNORE INTO album_entries VALUES (@path, @albumID, @date_added_to_album)", connection);
                     cmd.Parameters.AddWithValue("@path", path);
                     cmd.Parameters.AddWithValue("@albumID", albumID);
                     cmd.Parameters.AddWithValue("@date_added_to_album", DateTime.Now);
@@ -306,9 +354,9 @@ namespace Actual_DB_Test
         }
 
         //Add an item to media (main table) and an album.
-        public void MediaAndAlbumInsert(string path, int albumID, DateTime dateTaken)
+        public void MediaAndAlbumInsert(string path, int albumID, DateTime dateTaken, bool folder)
         {
-            InsertMedia(path, dateTaken);
+            InsertMedia(path, dateTaken, folder);
             AddToAlbum(path, albumID);
         }
 

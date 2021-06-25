@@ -9,18 +9,20 @@ namespace Actual_DB_Test
         {
             Connection c = new();
             List<Connection.Media> yes = new();
-            //c.InsertMedia("item1", DateTime.Now);
-            //c.InsertMedia("item2", DateTime.Now);
-            //c.InsertMedia("item3", DateTime.Now);
-            //c.InsertMedia("item4", DateTime.Now);
-            //c.InsertMedia("item5", DateTime.Now);
-            var cool = c.IsFolder("test2");
-            Console.WriteLine(cool);
-            yes = c.LoadMediaTable();
+            //c.InsertMedia("item6", DateTime.Now, false);
+            //c.InsertMedia("item7", DateTime.Now, false);
+            //c.MediaAndAlbumInsert("item69", 1, DateTime.Now, true);
+            //var cool = c.IsFolder("test2");
+            //Console.WriteLine(cool);
+            //yes = c.LoadMediaTable();
+
+            c.CreateAlbum("album", false);
+            var yes2 = c.GetAlbumName(3);
+            Console.WriteLine(yes2);
 
             //foreach (var y in yes)
             //{
-                //Console.WriteLine(y.path + '\t' + y.dateAdded + '\t' + y.dateTaken);
+            //Console.WriteLine(y.path + '\t' + y.dateAdded + '\t' + y.dateTaken);
             //}
         }
     }
