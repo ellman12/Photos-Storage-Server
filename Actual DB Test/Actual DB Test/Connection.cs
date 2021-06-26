@@ -30,6 +30,23 @@ namespace Actual_DB_Test
             }
         }
 
+        //Represents row in albums table.
+        public struct Album
+        {
+            public readonly int id;
+            public readonly string name;
+            public readonly string album_cover;
+            public readonly bool folder;
+
+            public Album(int id, string name, string album_cover, bool folder)
+            {
+                this.id = id;
+                this.name = name;
+                this.album_cover = album_cover;
+                this.folder = folder;
+            }
+        }
+
         public Connection()
         {
             server = "localhost";
@@ -312,14 +329,52 @@ namespace Actual_DB_Test
             }
         }
 
-        //Add a single path to an album in album_entries.
+        //Add a single path to an album or folder in album_entries.
         public void AddToAlbum(string path, int albumID)
         {
-            if (IsFolder(GetAlbumName(albumID))) //If it's a folder, update it as separate in media.
+            if (IsFolder(GetAlbumName(albumID))) //If the specified album ID is a folder, update the path as separate in media.
             {
-                try //TODO
+                try
                 {
-                    MySqlCommand cmd = new( , connection);
+                    OpenConnection();
+                    MySqlCommand cmd = new("UPDATE media SET separate=1 WHERE path=@path", connection);
+                    cmd.Parameters.AddWithValue("@path", path);
+                    cmd.ExecuteNonQuery();
+
+                    //Then, remove the path from other albums and folders, so it will only be in this single folder.
+                    cmd.CommandText = "DELETE FROM album_entries WHERE path=@path";
+                    cmd.ExecuteNonQuery();
+                }
+                catch (MySqlException e)
+                {
+                    Console.WriteLine("An unknown error occurred. Error code: " + e.Number + " Message: " + e.Message);
+                }
+                finally
+                {
+                    CloseConnection();
+                }
+            }
+            else //If a regular album is specified, remove this path from any folder(s) and mark as not separate.
+            {
+                try
+                {
+                    //Get all the folders from albums table.
+                    OpenConnection();
+                    List<Album> albums = new();
+                    MySqlCommand cmd = new("SELECT * FROM albums WHERE folder=1", connection);
+                    cmd.ExecuteNonQuery();
+                    MySqlDataReader r = cmd.ExecuteReader();
+
+                    while (r.Read())
+                    {
+                        if (r.GetBoolean(3) == true) //If it is a folder.
+                            albums.Add(new(r.GetInt32(0), r.GetString(1), r.GetString(2), r.GetBoolean(3))); //Add new album to List
+                    }
+
+                    foreach (var album in albums)
+                    {
+                        Console.WriteLine(album);
+                    }
                 }
                 catch (MySqlException e)
                 {
@@ -331,25 +386,24 @@ namespace Actual_DB_Test
                 }
             }
 
-            if (OpenConnection())
+            //Finally, add it to the desired album/folder.
+            OpenConnection();
+            try
             {
-                try
-                {
-                    //Will IGNORE (not throw error) if there is a duplicate.
-                    MySqlCommand cmd = new("INSERT IGNORE INTO album_entries VALUES (@path, @albumID, @date_added_to_album)", connection);
-                    cmd.Parameters.AddWithValue("@path", path);
-                    cmd.Parameters.AddWithValue("@albumID", albumID);
-                    cmd.Parameters.AddWithValue("@date_added_to_album", DateTime.Now);
-                    cmd.ExecuteNonQuery();
-                }
-                catch (MySqlException e)
-                {
-                    Console.WriteLine("An unknown error occurred. Error code: " + e.Number + " Message: " + e.Message);
-                }
-                finally
-                {
-                    CloseConnection();
-                }
+                //Will IGNORE (not throw error) if there is a duplicate.
+                MySqlCommand cmd = new("INSERT IGNORE INTO album_entries VALUES (@path, @albumID, @date_added_to_album)", connection);
+                cmd.Parameters.AddWithValue("@path", path);
+                cmd.Parameters.AddWithValue("@albumID", albumID);
+                cmd.Parameters.AddWithValue("@date_added_to_album", DateTime.Now);
+                cmd.ExecuteNonQuery();
+            }
+            catch (MySqlException e)
+            {
+                Console.WriteLine("An unknown error occurred. Error code: " + e.Number + " Message: " + e.Message);
+            }
+            finally
+            {
+                CloseConnection();
             }
         }
 
@@ -480,7 +534,7 @@ namespace Actual_DB_Test
 
                     while (reader.Read())
                     {
-                        //Add new row
+                        //Add new row to List
                         media.Add(new(reader.GetString(0), reader.GetDateTime(1), reader.GetDateTime(2)));
                     }
                 }
